@@ -26,11 +26,27 @@ def getAllDishesAmount(order):
 		if item is None:
 			continue
 
-		price = getObjectField(item, "price", defaultValue = 0.0)
+		
+		price = getOrderItemPrice(orderItem)
 		quantity = getObjectField(orderItem, "quantity", defaultValue = 1.0)
 		amount += (price * quantity)
 	
 	return amount
+
+def getOrderItemPrice(orderItem):
+	item = getObjectField(orderItem, "miInstance", defaultValue = None)
+	if item is None:
+		raise Exception("not find miInstance in the orderItem")
+
+	sizeOption = getObjectField(item, "sizeOptions", defaultValue = None)
+	if sizeOption is None:
+		raise Exception("no sizeOption for the orderItem")
+
+	for op in sizeOption:
+		if op["selected"]:
+			return op["price"]
+	
+	raise Exception(f"can't find the price for the orderItem: {item['name']}")
 
 def getSurcharge(order):
 	surcharge = getObjectField(order, "surchargeAmount", defaultValue = 0.0)

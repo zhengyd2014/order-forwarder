@@ -255,7 +255,24 @@ orderObj1 = json.loads('''
     {
       "miInstance": {
         "name": "Sichuan Cold Noodles",
-        "price": 5.0
+        "price": 5.0,
+        "sizeOptions": [
+          {
+            "name": "Chicken",
+            "price": 11.75,
+            "selected": false
+          },
+          {
+            "name": "Roast Pork",
+            "price": 11.75,
+            "selected": false
+          },
+          {
+            "name": "Vegetable",
+            "price": 5.0,
+            "selected": true
+          }
+        ]
       },
       "quantity": 5,
       "id": "1627224201926"
@@ -263,7 +280,24 @@ orderObj1 = json.loads('''
     {
       "miInstance": {
         "name": "Pan Fried Noodles (Pork, Chicken, Beef or Vegetables)",
-        "price": 25.0
+        "price": 25.0,
+        "sizeOptions": [
+          {
+            "name": "Chicken",
+            "price": 11.75,
+            "selected": false
+          },
+          {
+            "name": "Roast Pork",
+            "price": 11.75,
+            "selected": false
+          },
+          {
+            "name": "Vegetable",
+            "price": 25.0,
+            "selected": true
+          }
+        ]
       },
       "quantity": 3,
       "id": "1627224244576"
