@@ -49,6 +49,8 @@ class AccessImporter:
         for orderItem in util.getObjectField(order, "orderItems", []):
             self.insertOrderTransactions(orderId, orderItem)
 
+        self.insertSurchargeInOrderTransactions(orderId)
+
 
     # insert into OrderTransactions
     '''
@@ -141,6 +143,48 @@ class AccessImporter:
 
         self.conn.commit()
 
+    
+    def insertSurchargeInOrderTransactions(self, orderId):
+        tableName = "OrderTransactions"
+        cursor = self.conn.cursor()
+        
+        orderTansaction = {
+            "OrderID": orderId,
+            "MenuItemID": 377,
+            "MenuItemUnitPrice": 2,
+            "Quantity": 1,
+            "ExtendedPrice": 2,
+            "DiscountTaxable": False,      # disk: check,  for surcharge $2: uncheck
+            "TransactionStatus": 1,
+            "NotificationStatus": 1,
+            "GSTTaxable": 0,
+            "FoodStampsPayable": 0,
+            "LiquorTaxApplied": 0,
+            "PizzaLabelPrinted": 0,
+            "RemoteOrigRowID": 2,
+            "GlobalID": 9,
+            "RowVer": "others",
+            "Kitchen1Printed": 0,
+            "Kitchen2Printed": 0,
+            "Kitchen3Printed": 0,
+            "Kitchen4Printed": 0,
+            "Kitchen5Printed": 0,
+            "Kitchen6Printed": 0,
+            "BarPrinted": 0,
+            "ItemFired": 0,
+            "RowGUID": uuid.uuid4()
+        }
+
+        (insertStatement, valueList) = util.buildInsertStatement(tableName, orderTansaction)
+        
+        print(f"statement: {insertStatement}")
+        print(f"values: {valueList}")
+        cursor.execute(insertStatement, 
+            valueList
+        )
+
+        self.conn.commit()
+
 
     def insertOrderHeaders(self, order) -> int:
         cursor = self.conn.cursor()
@@ -161,7 +205,7 @@ class AccessImporter:
             "SalesTaxAmountUsed": util.getTax(order),  # tax
             "GSTRate": 0,
             "GSTAmountUsed": 0,
-            "SpecificCustomerName":  "",  # <orderNumber>-<phone_last_4_digits>-<customer_name>
+            "SpecificCustomerName":  util.getSpecialCustomerName(order),  # <orderNumber>-<phone_last_4_digits>-<customer_name>
             "GuestCheckPrinted": True,  # checked
             "ServerBankAmount": 0,
             "Kitchen4AlreadyPrinted": 0,
