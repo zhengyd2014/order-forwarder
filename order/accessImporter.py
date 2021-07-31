@@ -260,7 +260,7 @@ class AccessImporter:
 
 
     def findMenuItemUnitPrice(self, orderItem):
-        return orderItem["miInstance"]["price"]
+        return util.getOrderItemPrice(orderItem)
     
     def findQuantity(self, orderItem):
         return orderItem["quantity"]
