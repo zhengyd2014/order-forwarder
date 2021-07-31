@@ -1,12 +1,12 @@
 from order.orderRetriever import OrderRetriever
-from order.config import URL, TOKEN
+from order.config import DB_FILE, URL, TOKEN
 import time
 from order import util, accessImporter
 
 
 def main():
     retriever = OrderRetriever(URL, TOKEN)
-    access = accessImporter.AccessImporter("Y:\\new-01-16.mdb")
+    access = accessImporter.AccessImporter(DB_FILE)
 
     startTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     print(f"{startTime}: start retrieving new orders ... ")
@@ -24,7 +24,6 @@ def main():
         if len(newOrders) == 0:
             continue
 
-        
         for order in newOrders:
             print("--------")
             util.printOrder(order)

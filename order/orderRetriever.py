@@ -1,6 +1,6 @@
 import requests
 import json
-import util
+from order import util
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
 
@@ -55,6 +55,14 @@ class OrderRetriever:
 		
 		self.lastOrderCreationTime = maxCreationTime
 		return newOrders
+
+	def getOrderByID(self, orderID):
+		orders = self.getAllOrders()
+		for order in orders:
+			if orderID == util.getObjectField(order, "orderNumber", defaultValue = 0):
+				return order
+
+		return None
 
 
 

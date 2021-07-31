@@ -97,7 +97,7 @@ class AccessImporter:
         cursor = self.conn.cursor()
         
         
-        qmenu_item_id = util.getObjectField(orderItem, "id", defaultValue = '')
+        qmenu_item_id = util.getObjectField(orderItem["miInstance"], "id", defaultValue = '')
         menuItemID = self.findMenuItemID(qmenu_item_id)
         if menuItemID == "":
             raise Exception(f"not found menuItemID for {qmenu_item_id}")
@@ -108,9 +108,26 @@ class AccessImporter:
             "MenuItemID": menuItemID,
             "MenuItemUnitPrice": self.findMenuItemUnitPrice(orderItem),
             "Quantity": self.findQuantity(orderItem),
-            "ExtendedPrice": self.findExtendedPrice(orderItem),
-            "TransactionStatus": "pending",
-            "NotificationStatus": "pending",
+            "ExtendedPrice": self.findExtendedPrice(orderItem) * self.findQuantity(orderItem),
+            "DiscountTaxable": True,      # disk: check,  for surcharge $2: uncheck
+            "TransactionStatus": 1,
+            "NotificationStatus": 1,
+            "OnHoldUntilTime": datetime(9999,12,31),
+            "GSTTaxable": 0,
+            "FoodStampsPayable": 0,
+            "LiquorTaxApplied": 0,
+            "PizzaLabelPrinted": 0,
+            "RemoteOrigRowID": 2,
+            "GlobalID": 9,
+            "RowVer": "others",
+            "Kitchen1Printed": 0,
+            "Kitchen2Printed": 0,
+            "Kitchen3Printed": 0,
+            "Kitchen4Printed": 0,
+            "Kitchen5Printed": 0,
+            "Kitchen6Printed": 0,
+            "BarPrinted": 0,
+            "ItemFired": 0,
             "RowGUID": uuid.uuid4()
         }
 
@@ -128,16 +145,34 @@ class AccessImporter:
     def insertOrderHeaders(self, order) -> int:
         cursor = self.conn.cursor()
         rowUUID = uuid.uuid4()
+        now = datetime.now()
         orderMap = {
-            "OrderDateTime": datetime.now(),
-            "EmployeeID": 100,
+            "OrderDateTime": now,
+            "EmployeeID": 9,
             "StationID": 2,
             "OrderType": 3,
+            "DeliveryCharge": 0,
+            "DeliveryComp": 0,
             "SalesTaxRate": 7,
-            "OrderStatus": 2,
-            "AmountDue": util.getOrderSubtotal(order),
-            "Subtotal": util.getOrderSubtotal(order),
-            "SalesTaxAmountUsed": 0.0,
+            "OrderStatus": 1,
+            "AmountDue": util.getAmountDue(order),     # + tip
+            "Subtotal": util.getOrderSubtotal(order),  # no tip, but + surcharge
+            "CashGratuity": util.getTip(order),        # tip
+            "SalesTaxAmountUsed": util.getTax(order),  # tax
+            "GSTRate": 0,
+            "GSTAmountUsed": 0,
+            "SpecificCustomerName":  "",  # <orderNumber>-<phone_last_4_digits>-<customer_name>
+            "GuestCheckPrinted": True,  # checked
+            "ServerBankAmount": 0,
+            "Kitchen4AlreadyPrinted": 0,
+            "Kitchen5AlreadyPrinted": 0,
+            "Kitchen6AlreadyPrinted": 0,
+            "LiquorTaxRate": 0,
+            "LiquorTaxAmount": 0,
+            "EditTimestamp": now,
+            "RemoteOrigRowID": 0,
+            "StoreNumber": 0,
+            "BarTabPreAuth": 0,
             "RowGUID": rowUUID
         }
 

@@ -296,8 +296,12 @@ class Test_Util(unittest.TestCase):
         #  tax = 100 * 0.07 = 7
         #  surcharge = 2
         #  tip = 1
-        #  subtotal = 110.0
-        self.assertEqual(subtotal, 110.0)
+
+        #  subtotal = dish price + surcharge
+        #  tax = dish_price * taxRate
+        #  amountDue = subtotal + tax + tip
+        self.assertEqual(subtotal, 102.0)
+        self.assertEqual(util.getAmountDue(orderObj1), 110.0)
 
 
     # def test_db(self):

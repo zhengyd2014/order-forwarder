@@ -11,8 +11,16 @@ def utcToLocal(utc_datetime):
 def getObjectField(order, fieldName, defaultValue = ''):
     return order.get(fieldName, defaultValue)
 
+def getAmountDue(order):
+	amountDue = getOrderSubtotal(order) + getTax(order) + getTip(order)
+	return round(amountDue, 2)
+
 def getOrderSubtotal(order):
-	subtotal = 0.0
+	subtotal = getAllDishesAmount(order) + getSurcharge(order)
+	return round(subtotal, 2)
+
+def getAllDishesAmount(order):
+	amount = 0.0
 	for orderItem in order["orderItems"]:
 		item = getObjectField(orderItem, "miInstance", defaultValue = None)
 		if item is None:
@@ -20,18 +28,25 @@ def getOrderSubtotal(order):
 
 		price = getObjectField(item, "price", defaultValue = 0.0)
 		quantity = getObjectField(orderItem, "quantity", defaultValue = 1.0)
-		subtotal += (price * quantity)
+		amount += (price * quantity)
+	
+	return amount
 
-	taxRate = getObjectField(order, "taxRate", defaultValue = 0.0)
-	subtotal += (taxRate * subtotal)
-
+def getSurcharge(order):
 	surcharge = getObjectField(order, "surchargeAmount", defaultValue = 0.0)
+	return surcharge
+
+
+
+def getTip(order):
 	tip = getObjectField(order, "tip", defaultValue = 0.0)
-	subtotal += (surcharge + tip)
+	return tip
 
-	subtotal = round(subtotal, 2)
-
-	return subtotal
+def getTax(order):
+	dishAmount = getAllDishesAmount(order)
+	taxRate = getObjectField(order, "taxRate", defaultValue = 0.0)
+	tax = taxRate * dishAmount
+	return tax
 
 
 def printOrder(order):
