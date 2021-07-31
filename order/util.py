@@ -43,7 +43,7 @@ def getTip(order):
 def getTax(order):
 	dishAmount = getAllDishesAmount(order)
 	taxRate = getObjectField(order, "taxRate", defaultValue = 0.0)
-	tax = taxRate * dishAmount
+	tax = round(taxRate * dishAmount, 2)
 	return tax
 
 # <orderNumber>-<phone_last_4_digits>-<customer_name>
@@ -53,7 +53,7 @@ def getSpecialCustomerName(order):
 	phoneNumber = getObjectField(customer, "phone", defaultValue = "")
 	firstName = getObjectField(customer, "firstName", defaultValue = "")
 	lastName = getObjectField(customer, "lastName", defaultValue = "")
-	name = f"{orderNumber}-{phoneNumber[-4]}-{firstName}.{lastName}"
+	name = f"{orderNumber}-{phoneNumber[-4:]}-{firstName}.{lastName}"
 	return name
 
 
