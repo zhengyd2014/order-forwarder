@@ -82,8 +82,11 @@ def printOrder(order):
 	print(f"order Items: ")
 	for orderItem in order["orderItems"]:
 		item = orderItem["miInstance"]
-		print(f"\tid: {item['id']}, name: {item['name']}, price: ${item['price']}, quantity: {orderItem['quantity']}")
-	print(f"tip: ${order['tip']}")
+		print(f"\tid: {item['id']}, name: {item['name']}, price: {getOrderItemPrice(orderItem)}, quantity: {orderItem['quantity']}")
+	print(f"tip: ${getTip(order)}")
+	print(f"tax: ${getTax(order)}")
+	print(f"subtotal: ${getOrderSubtotal(order)}")
+	print(f"amountDue: ${getAmountDue(order)}")
 	print(f"type: {order['type']}")
 	print(f"createdAt(UTC): {order['createdAt']}")
 

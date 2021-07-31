@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 URL = "https://9v8upsmsai.execute-api.us-east-1.amazonaws.com/prod/biz/orders"
-TOKEN = "Bearer J0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJxbWVudSIsInJlc3RhdXJhbnQiOiJ7XCJuYW1lXCI6XCJTaWNodWFuIEdvdXJtZXRcIixcImlkXCI6XCI1OWI1ODZlY2I3YTQ5ZjExMDAwN2JiYTVcIn0ifQ.FdnUPZ-O57qOpeN3ilfLKEVjt9z79IN8Q_V_NIMsn6k"
+TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJxbWVudSIsInJlc3RhdXJhbnQiOiJ7XCJuYW1lXCI6XCJTaWNodWFuIEdvdXJtZXRcIixcImlkXCI6XCI1OWI1ODZlY2I3YTQ5ZjExMDAwN2JiYTVcIn0ifQ.FdnUPZ-O57qOpeN3ilfLKEVjt9z79IN8Q_V_NIMsn6k"
 
 # db file to write order to
 # DB_FILE = "Y:\\new-01-16.mdb"
