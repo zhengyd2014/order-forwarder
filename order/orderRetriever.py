@@ -24,6 +24,9 @@ class OrderRetriever:
 
 		# load orders
 		orders = json.loads(resp.content)
+		newestOrderNumber = util.getObjectField(orders[0], "orderNumber", defaultValue = 0)
+		oldestOrderNumber = util.getObjectField(orders[-1], "orderNumber", defaultValue = 0)
+		print(f"> get {len(orders)} orders, oldest order number: {oldestOrderNumber}, newest order number: {newestOrderNumber}")
 		return orders
 
 	def getLastOrderCreationTime(self):
@@ -39,19 +42,20 @@ class OrderRetriever:
 
 	def findNewOrders(self):
 		orders = self.getAllOrders()
-		newOrders = [];
+		newOrders = []
 		maxCreationTime = self.lastOrderCreationTime
+		index = 0;
 		for order in orders:
+			orderId = util.getObjectField(order, "orderNumber", defaultValue = 0)
 			creationTimeStr = util.getObjectField(order, "createdAt")
 			creationTimeStr = creationTimeStr[0:creationTimeStr.index(".")]
 			creationTime = datetime.strptime(creationTimeStr, '%Y-%m-%dT%H:%M:%S')
-			# print(type(creationTime))
-			# print(creationTime)
-
-
+			print(f">>>> comparing the {index} order: number: {orderId}, creation time: {creationTime}")
 			if  creationTime > self.lastOrderCreationTime:
+				print(f"> find new order with id {orderId}")
 				newOrders.append(order)
 				maxCreationTime = max(maxCreationTime, creationTime)
+			index += 1
 		
 		self.lastOrderCreationTime = maxCreationTime
 		return newOrders
