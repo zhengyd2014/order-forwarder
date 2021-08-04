@@ -1,6 +1,7 @@
 from order.orderRetriever import OrderRetriever
 from order.config import DB_FILE, URL, TOKEN
 import time
+import sys
 from order import util, accessImporter
 
 
@@ -15,7 +16,9 @@ def main():
         print("sleep for 1 minutes")
         for sec in range(0, 60):
             print(f' {sec}', end='')
+            sys.stdout.flush()
             time.sleep(1)
+        print("")
 
         localTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         newOrders = retriever.findNewOrders()
