@@ -166,7 +166,7 @@ class AccessImporter:
             "PizzaLabelPrinted": 0,
             "RemoteOrigRowID": 2,
             "GlobalID": 9,
-            "RowVer": "others",
+            "RowVer": "",
             "StoreNumber": 2,
             "Kitchen1Printed": 0,
             "Kitchen2Printed": 0,

@@ -12,7 +12,7 @@ def getObjectField(order, fieldName, defaultValue = ''):
     return order.get(fieldName, defaultValue)
 
 def getAmountDue(order):
-	amountDue = getOrderSubtotal(order) + getTax(order) + getTip(order)
+	amountDue = getOrderSubtotal(order) + getTax(order)
 	return round(amountDue, 2)
 
 def getOrderSubtotal(order):
