@@ -13,7 +13,9 @@ def main():
 
     while True:
         print("sleep for 1 minutes")
-        time.sleep(60)
+        for sec in range(0, 60):
+            print(f' {sec}', end='')
+            time.sleep(1)
 
         localTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         newOrders = retriever.findNewOrders()
