@@ -50,7 +50,7 @@ class OrderRetriever:
 			creationTimeStr = util.getObjectField(order, "createdAt")
 			creationTimeStr = creationTimeStr[0:creationTimeStr.index(".")]
 			creationTime = datetime.strptime(creationTimeStr, '%Y-%m-%dT%H:%M:%S')
-			print(f">>>> comparing the {index} order: number: {orderId}, creation time: {creationTime}")
+			# print(f">>>> comparing the {index} order: number: {orderId}, creation time: {creationTime}")
 			if  creationTime > self.lastOrderCreationTime:
 				print(f"> find new order with id {orderId}")
 				newOrders.append(order)
