@@ -100,7 +100,9 @@ class AccessImporter:
         
         
         qmenu_item_id = util.getObjectField(orderItem["miInstance"], "id", defaultValue = '')
-        menuItemID = self.findMenuItemID(qmenu_item_id)
+        sizeOptionIndex = util.getSizeOptionIndex(orderItem)
+        qmenu_item_id = f"{qmenu_item_id}+{sizeOptionIndex}"
+        menuItemID, menuName, printer = self.findMenuItemID(qmenu_item_id)
         if menuItemID == "":
             raise Exception(f"not found menuItemID for {qmenu_item_id}")
 
@@ -121,7 +123,7 @@ class AccessImporter:
             "PizzaLabelPrinted": 0,
             "RemoteOrigRowID": 2,
             "GlobalID": 9,
-            "RowVer": "others",
+            "RowVer": printer,
             "StoreNumber": 2,
             "Kitchen1Printed": 0,
             "Kitchen2Printed": 0,
@@ -251,12 +253,12 @@ class AccessImporter:
             print(f"no id for input orderItem: {qmenu_item_id}")
         
         try:
-            lasosichun_menu_id = config.MENU_ITEM_MAP[qmenu_item_id]
+            (lasosichun_menu_id, lasichuan_menu_name, lasichuan_printer) = config.MENU_ITEM_MAP[qmenu_item_id]
         except:
             print(f"no corresponding Lao Sichuan menu item id found for {qmenu_item_id}, need to add it to the map!")
-            lasosichun_menu_id = ''
+            (lasosichun_menu_id, lasichuan_menu_name, lasichuan_printer) = ("", "", "")
 
-        return lasosichun_menu_id
+        return (lasosichun_menu_id, lasichuan_menu_name, lasichuan_printer)
 
 
     def findMenuItemUnitPrice(self, orderItem):
