@@ -10,7 +10,12 @@ class AccessImporter:
         connectionStr = 'Driver={Microsoft Access Driver (*.mdb, *.accdb)};' + f'DBQ={dbFile};'
         # print(f"connectStr: {connectionStr}")
         self.conn = pyodbc.connect(connectionStr)
-        
+
+
+    def close(self):
+        print("close database connection")
+        self.conn.close()
+
  
     def printAllRows(self, tableName):
         cursor = self.conn.cursor()

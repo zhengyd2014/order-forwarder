@@ -18,6 +18,9 @@ def main():
         access.importOrder(order)
     else:
         "aborted!"
+    
+    access.close()
+    print("exit")
 
 if __name__=="__main__":
     main()
