@@ -38,7 +38,7 @@ def main():
             time.sleep(1)
         print("")
 
-        localTime = {getCurrentTimeInString()}
+        localTime = getCurrentTimeInString()
         newOrders = retriever.findNewOrders()
 
         lastOrderTime = retriever.lastOrderCreationTime.strftime("%Y-%m-%d %H:%M:%S")
