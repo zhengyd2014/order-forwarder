@@ -104,9 +104,7 @@ class AccessImporter:
         cursor = self.conn.cursor()
         
         
-        qmenu_item_id = util.getObjectField(orderItem["miInstance"], "id", defaultValue = '')
-        sizeOptionIndex = util.getSizeOptionIndex(orderItem)
-        qmenu_item_id = f"{qmenu_item_id}+{sizeOptionIndex}"
+        qmenu_item_id = util.getQMenuItemId(orderItem)
         menuItemID, menuName, printer = self.findMenuItemID(qmenu_item_id)
         if menuItemID == "":
             raise Exception(f"not found menuItemID for {qmenu_item_id}")

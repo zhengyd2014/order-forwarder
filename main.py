@@ -49,7 +49,7 @@ def main():
 
         for order in newOrders:
             print("--------")
-            util.printOrder(order)
+            util.printOrder(order, retriever.getMenuItems())
             print("")
             access.importOrder(order)
 

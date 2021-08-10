@@ -11,13 +11,16 @@ def utcToLocal(utc_datetime):
 def getObjectField(order, fieldName, defaultValue = ''):
     return order.get(fieldName, defaultValue)
 
+
 def getAmountDue(order):
 	amountDue = getOrderSubtotal(order) + getTax(order)
 	return round(amountDue, 2)
 
+
 def getOrderSubtotal(order):
 	subtotal = getAllDishesAmount(order) + getSurcharge(order)
 	return round(subtotal, 2)
+
 
 def getAllDishesAmount(order):
 	amount = 0.0
@@ -33,6 +36,7 @@ def getAllDishesAmount(order):
 	
 	return amount
 
+
 def getOrderItemPrice(orderItem):
 	item = getObjectField(orderItem, "miInstance", defaultValue = None)
 	sizeOption = getSizeOption(orderItem)
@@ -43,14 +47,16 @@ def getOrderItemPrice(orderItem):
 	raise Exception(f"can't find the price for the orderItem: {item['name']}")
 
 
-def getSizeOptionIndex(orderItem):
+def getSelectedSizeOption(orderItem):
 	sizeOption = getSizeOption(orderItem)
 	for index in range(0, len(sizeOption)):
 		op = sizeOption[index]
 		if op["selected"]:
-			return index
-	# no selected found, return 0
-	return 0
+			return op
+
+	# no selected found, return the first one
+	return sizeOption[0]
+
 
 def getSizeOption(orderItem):
 	item = getObjectField(orderItem, "miInstance", defaultValue = None)
@@ -61,6 +67,30 @@ def getSizeOption(orderItem):
 	if sizeOption is None:
 		raise Exception("no sizeOption for the orderItem")
 	return sizeOption
+
+
+# find the final qmenu id through orderItem
+# the format is "qmenu_id+<index_of_size_option>"
+def getQMenuItemId(orderItem, menu_items):
+
+	# get selected sizeOption from order
+	original_qmenu_item_id = getObjectField(orderItem["miInstance"], "id", defaultValue = '')
+	selectedSizeOption = getSelectedSizeOption(orderItem)
+
+	# find the corresponding sizeOption from menu by comparing the name
+	menu_item = menu_items[original_qmenu_item_id]
+	sizeOption = menu_item["sizeOptions"]
+	sizeOptionIndex = 0
+	for index in range(0, len(sizeOption)):
+		op = sizeOption[index]
+		if selectedSizeOption["name"] == op["name"]:
+			sizeOptionIndex = index
+			break
+
+	# construct the final qmenu_item_id 
+	qmenu_item_id = f"{original_qmenu_item_id}+{sizeOptionIndex}"
+	return qmenu_item_id
+
 
 def getSurcharge(order):
 	surcharge = getObjectField(order, "surchargeAmount", defaultValue = 0.0)
@@ -76,6 +106,7 @@ def getTax(order):
 	tax = round(taxRate * dishAmount, 2)
 	return tax
 
+
 # <orderNumber>-<phone_last_4_digits>-<customer_name>
 def getSpecialCustomerName(order):
 	orderNumber = getObjectField(order, "orderNumber", defaultValue = 0)
@@ -87,7 +118,7 @@ def getSpecialCustomerName(order):
 	return name
 
 
-def printOrder(order):
+def printOrder(order, menu_items):
 	if order is None:
 		print("order not found, try again!")
 		return
@@ -96,7 +127,7 @@ def printOrder(order):
 	print(f"order Items: ")
 	for orderItem in order["orderItems"]:
 		item = orderItem["miInstance"]
-		print(f"\tid: {item['id']}, name: {item['name']}, price: {getOrderItemPrice(orderItem)}, quantity: {orderItem['quantity']}")
+		print(f"\tid: {getQMenuItemId(orderItem, menu_items)}, name: {item['name']}, price: {getOrderItemPrice(orderItem)}, quantity: {orderItem['quantity']}")
 	print(f"tip: ${getTip(order)}")
 	print(f"tax: ${getTax(order)}")
 	print(f"subtotal: ${getOrderSubtotal(order)}")

@@ -11,7 +11,7 @@ def main():
     orderID = int(input("input the order you want to find: "))
     
     order = retriever.getOrderByID(orderID)
-    util.printOrder(order)
+    util.printOrder(order, retriever.getMenuItems())
 
     confirm = input("type 'y' to confirm import the order, other to abort: ").lower()
     if (confirm == "y"):

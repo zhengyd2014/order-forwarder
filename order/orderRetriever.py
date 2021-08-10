@@ -9,18 +9,29 @@ class OrderRetriever:
 		self.url = url
 		self.token = token
 		self.lastOrderCreationTime = self.getLastOrderCreationTime()
+		self.menu_items = self.getAllMenus()
 
-	def getAllOrders(self):
+
+	def getMenuItems(self):
+		return self.menu_items
+
+
+	def get(self, url):
 		headers = CaseInsensitiveDict()
 		headers["Accept"] = "application/json"
 		headers["Authorization"] = self.token
 
-		resp = requests.get(self.url, headers=headers)
+		resp = requests.get(url, headers=headers)
 
 		if resp.status_code != 200:
 			print(f"can't access website, check if token is assigned, or re-generate the token, exit!")
 			print(f"error: status code: {resp.status_code}, error message: {resp.content}")
 			exit(1)
+		
+		return resp
+
+	def getAllOrders(self):
+		resp = self.get(self.url)
 
 		# load orders
 		orders = json.loads(resp.content)
@@ -28,6 +39,45 @@ class OrderRetriever:
 		oldestOrderNumber = util.getObjectField(orders[-1], "orderNumber", defaultValue = 0)
 		print(f"> get {len(orders)} orders, oldest order number: {oldestOrderNumber}, newest order number: {newestOrderNumber}")
 		return orders
+	
+
+	def getAllMenus(self):
+		## hardcoded menu url here, as I don't want to modify config file
+		menu_url = "https://9v8upsmsai.execute-api.us-east-1.amazonaws.com/prod/biz/restaurant"
+		resp = self.get(menu_url)
+		menus = json.loads(resp.content)["menus"]
+		menu_items = {}
+
+		'''
+		menus: {
+			0: {
+				mcs: {
+					0: {
+						mis: {
+							0: {
+								id: "1-1-1",
+								sizeOptions: {
+									0: {
+										name: "regular",
+										price: 5.5
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} 
+		'''
+		for menu_category in menus:
+			mcs = menu_category["mcs"]
+			for menu_subcategory in mcs:
+				mis = menu_subcategory["mis"]
+				for menu_item in mis:
+					menu_items[menu_item["id"]] = menu_item
+
+		return menu_items
+
 
 	def getLastOrderCreationTime(self):
 		orders = self.getAllOrders()
