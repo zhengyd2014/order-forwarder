@@ -228,6 +228,9 @@ class AccessImporter:
             "RowGUID": rowUUID
         }
 
+        if util.getTip(order) == 0.0:
+            del orderMap["CashGratuity"]
+
         (insertStatement, valueList) = util.buildInsertStatement("OrderHeaders", orderMap)
     
         print(f"statement: {insertStatement}")
