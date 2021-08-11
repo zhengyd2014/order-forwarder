@@ -6,7 +6,7 @@ from order import util, accessImporter
 
 def main():
     retriever = OrderRetriever(URL, TOKEN)
-    access = accessImporter.AccessImporter(DB_FILE)
+    access = accessImporter.AccessImporter(DB_FILE, retriever.menu_items)
 
     orderID = int(input("input the order you want to find: "))
     

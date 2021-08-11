@@ -5,11 +5,12 @@ import uuid
 from order import util, config
 
 class AccessImporter:
-    def __init__(self, dbFile):
+    def __init__(self, dbFile, menus):
         # self.conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=Y:\new-01-16.mdb;')
         connectionStr = 'Driver={Microsoft Access Driver (*.mdb, *.accdb)};' + f'DBQ={dbFile};'
         # print(f"connectStr: {connectionStr}")
         self.conn = pyodbc.connect(connectionStr)
+        self.menus = menus
 
 
     def close(self):
@@ -104,7 +105,7 @@ class AccessImporter:
         cursor = self.conn.cursor()
         
         
-        qmenu_item_id = util.getQMenuItemId(orderItem)
+        qmenu_item_id = util.getQMenuItemId(orderItem, self.menus)
         menuItemID, menuName, printer = self.findMenuItemID(qmenu_item_id)
         if menuItemID == "":
             raise Exception(f"not found menuItemID for {qmenu_item_id}")

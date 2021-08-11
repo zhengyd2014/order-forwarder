@@ -21,7 +21,7 @@ def main():
     print(f"{getCurrentTimeInString()}: start retrieving new orders ... ")
 
     retriever = OrderRetriever(URL, TOKEN)
-    access = accessImporter.AccessImporter(DB_FILE)
+    access = accessImporter.AccessImporter(DB_FILE, retriever.menu_items)
 
     # Setup signal handler
     signal.signal(signal.SIGINT, stop)
