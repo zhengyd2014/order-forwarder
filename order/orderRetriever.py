@@ -103,7 +103,7 @@ class OrderRetriever:
 			# print(f">>>> comparing the {index} order: number: {orderId}, creation time: {creationTime}")
 			if  creationTime > self.lastOrderCreationTime:
 				print(f"> find new order with id {orderId}")
-				newOrders.append(order)
+				newOrders.insert(0, order)
 				maxCreationTime = max(maxCreationTime, creationTime)
 			index += 1
 		
