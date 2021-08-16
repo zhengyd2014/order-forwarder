@@ -9,11 +9,12 @@ import traceback
 
 ## init logging ##
 import logging
+log_file = f"{getCurrentTimeInString()}.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(f"{getCurrentTimeInString()}.log", encoding="utf-8"),
+        logging.FileHandler(repr(log_file), encoding="utf-8"),
         logging.StreamHandler(sys.stdout)
     ]
 )

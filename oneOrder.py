@@ -5,11 +5,12 @@ from order import util, accessImporter
 import logging
 import sys
 
+log_file = f"{util.getCurrentTimeInString()}.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(f"{util.getCurrentTimeInString()}.log", encoding="utf-8"),
+        logging.FileHandler(repr(log_file), encoding="utf-8"),
         logging.StreamHandler(sys.stdout)
     ]
 )
