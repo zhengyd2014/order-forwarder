@@ -5,12 +5,12 @@ from order import util, accessImporter
 import logging
 import sys
 
-log_file = f"{util.getCurrentTimeInString()}.log"
+log_file = f"C:\\\\Users\\laosichuan\\order-forwarder\\{util.getCurrentTimeInString()}.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(r"{}".format(log_file), encoding="utf-8"),
+        logging.FileHandler(log_file, encoding="utf-8"),
         logging.StreamHandler(sys.stdout)
     ]
 )
