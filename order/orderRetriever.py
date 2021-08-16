@@ -3,6 +3,7 @@ import json
 from order import util
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
+import logging
 
 class OrderRetriever:
 	def __init__(self, url, token):
@@ -24,8 +25,8 @@ class OrderRetriever:
 		resp = requests.get(url, headers=headers)
 
 		if resp.status_code != 200:
-			print(f"can't access website, check if token is assigned, or re-generate the token, exit!")
-			print(f"error: status code: {resp.status_code}, error message: {resp.content}")
+			logging.error(f"can't access website, check if token is assigned, or re-generate the token, exit!")
+			logging.error(f"error: status code: {resp.status_code}, error message: {resp.content}")
 			exit(1)
 		
 		return resp
@@ -37,7 +38,7 @@ class OrderRetriever:
 		orders = json.loads(resp.content)
 		newestOrderNumber = util.getObjectField(orders[0], "orderNumber", defaultValue = 0)
 		oldestOrderNumber = util.getObjectField(orders[-1], "orderNumber", defaultValue = 0)
-		print(f"> get {len(orders)} orders, oldest order number: {oldestOrderNumber}, newest order number: {newestOrderNumber}")
+		logging.info(f"> get {len(orders)} orders, oldest order number: {oldestOrderNumber}, newest order number: {newestOrderNumber}")
 		return orders
 	
 
@@ -102,7 +103,7 @@ class OrderRetriever:
 			creationTime = datetime.strptime(creationTimeStr, '%Y-%m-%dT%H:%M:%S')
 			# print(f">>>> comparing the {index} order: number: {orderId}, creation time: {creationTime}")
 			if  creationTime > self.lastOrderCreationTime:
-				print(f"> find new order with id {orderId}")
+				logging.info(f"> find new order with id {orderId}")
 				newOrders.insert(0, order)
 				maxCreationTime = max(maxCreationTime, creationTime)
 			index += 1

@@ -2,6 +2,11 @@
 from datetime import datetime
 import time
 
+
+def getCurrentTimeInString():
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
+
 def utcToLocal(utc_datetime):
     now_timestamp = time.time()
     offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)

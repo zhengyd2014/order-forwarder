@@ -3,23 +3,24 @@ import pyodbc
 from datetime import datetime
 import uuid
 from order import util, config
+import logging
 
 class AccessImporter:
     def __init__(self, dbFile, menus):
         # self.conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=Y:\new-01-16.mdb;')
-        connectionStr = 'Driver={Microsoft Access Driver (*.mdb, *.accdb)};' + f'DBQ={dbFile};'
+        self.connectionStr = 'Driver={Microsoft Access Driver (*.mdb, *.accdb)};' + f'DBQ={dbFile};'
         # print(f"connectStr: {connectionStr}")
-        self.conn = pyodbc.connect(connectionStr)
+        # self.conn = pyodbc.connect(connectionStr)
         self.menus = menus
 
 
-    def close(self):
+    def close(self, conn):
         print("close database connection")
-        self.conn.close()
+        conn.close()
 
  
-    def printAllRows(self, tableName):
-        cursor = self.conn.cursor()
+    def printAllRows(self, tableName, conn):
+        cursor = conn.cursor()
         cursor.execute(f'select * from {tableName}')
         for row in cursor.fetchall():
             print (row)
@@ -27,35 +28,38 @@ class AccessImporter:
         cursor.close()
 
 
-    def displayMenuItems(self):
-        cursor = self.conn.cursor()
+    def displayMenuItems(self, conn):
+        cursor = conn.cursor()
         cursor.execute(f'select MenuItemID, MenuItemText, SecLangMenuItemText from MenuItems')
         for row in cursor.fetchall():
             print (row)
         
         cursor.close()
 
-    def printAllTables(self):
-        cursor = self.conn.cursor()
+    def printAllTables(self, conn):
+        cursor = conn.cursor()
         for row in cursor.tables():
             print(row)
 
         cursor.close()
  
 
-    def describeTable(self, tableName):
-        cursor = self.conn.cursor()
+    def describeTable(self, tableName, conn):
+        cursor = conn.cursor()
         cursor.execute(f'select * from {tableName}')
         for col in cursor.description:
             print(f'\tcol: {col}')
         cursor.close()
  
     def importOrder(self, order):
-        orderId = self.insertOrderHeaders(order)
-        for orderItem in util.getObjectField(order, "orderItems", []):
-            self.insertOrderTransactions(orderId, orderItem)
+        conn = pyodbc.connect(self.connectionStr)
 
-        self.insertSurchargeInOrderTransactions(orderId)
+        orderId = self.insertOrderHeaders(order, conn)
+        for orderItem in util.getObjectField(order, "orderItems", []):
+            self.insertOrderTransactions(orderId, orderItem, conn)
+
+        self.insertSurchargeInOrderTransactions(orderId, conn)
+        self.close(conn)
 
 
     # insert into OrderTransactions
@@ -100,10 +104,9 @@ class AccessImporter:
         col: ('RowOwner', <class 'int'>, None, 5, 5, 0, True)
         col: ('RowGUID', <class 'str'>, None, 50, 50, 0, True)
     '''
-    def insertOrderTransactions(self, orderId, orderItem):
+    def insertOrderTransactions(self, orderId, orderItem, conn):
         tableName = "OrderTransactions"
-        cursor = self.conn.cursor()
-        
+        cursor = conn.cursor()
         
         qmenu_item_id = util.getQMenuItemId(orderItem, self.menus)
         menuItemID, menuName, printer = self.findMenuItemID(qmenu_item_id)
@@ -142,18 +145,18 @@ class AccessImporter:
 
         (insertStatement, valueList) = util.buildInsertStatement(tableName, orderTansaction)
         
-        print(f"statement: {insertStatement}")
-        print(f"values: {valueList}")
+        logging.info(f"statement: {insertStatement}")
+        logging.info(f"values: {valueList}")
         cursor.execute(insertStatement, 
             valueList
         )
 
-        self.conn.commit()
+        conn.commit()
 
     
-    def insertSurchargeInOrderTransactions(self, orderId):
+    def insertSurchargeInOrderTransactions(self, orderId, conn):
         tableName = "OrderTransactions"
-        cursor = self.conn.cursor()
+        cursor = conn.cursor()
         
         orderTansaction = {
             "OrderID": orderId,
@@ -185,17 +188,17 @@ class AccessImporter:
 
         (insertStatement, valueList) = util.buildInsertStatement(tableName, orderTansaction)
         
-        print(f"statement: {insertStatement}")
-        print(f"values: {valueList}")
+        logging.info(f"statement: {insertStatement}")
+        logging.info(f"values: {valueList}")
         cursor.execute(insertStatement, 
             valueList
         )
 
-        self.conn.commit()
+        conn.commit()
 
 
-    def insertOrderHeaders(self, order) -> int:
-        cursor = self.conn.cursor()
+    def insertOrderHeaders(self, order, conn) -> int:
+        cursor = conn.cursor()
         rowUUID = uuid.uuid4()
         now = datetime.now()
         orderMap = {
@@ -233,36 +236,36 @@ class AccessImporter:
 
         (insertStatement, valueList) = util.buildInsertStatement("OrderHeaders", orderMap)
     
-        print(f"statement: {insertStatement}")
-        print(f"values: {valueList}")
+        logging.info(f"statement: {insertStatement}")
+        logging.info(f"values: {valueList}")
         cursor.execute(insertStatement, 
             valueList
         )
 
-        self.conn.commit()
+        conn.commit()
 
-        orderId = self.findOrderId(rowUUID)
-        print(f"inserted an order with id: {orderId}")
+        orderId = self.findOrderId(rowUUID, conn)
+        logging.info(f"inserted an order with id: {orderId}")
         return orderId
 
     
-    def findOrderId(self, rowUUID):
-        cursor = self.conn.cursor()
+    def findOrderId(self, rowUUID, conn):
+        cursor = conn.cursor()
         queryStatement = 'select * from OrderHeaders where RowGUID = ?'
         cursor.execute(queryStatement, rowUUID)
         row = cursor.fetchone()
-        print(row)
+        logging.info(row)
         return row.OrderID
     
 
     def findMenuItemID(self, qmenu_item_id):
         if qmenu_item_id == '':
-            print(f"no id for input orderItem: {qmenu_item_id}")
+            logging.error(f"no id for input orderItem: {qmenu_item_id}")
         
         try:
             (lasosichun_menu_id, lasichuan_menu_name, lasichuan_printer) = config.MENU_ITEM_MAP[qmenu_item_id]
         except:
-            print(f"no corresponding Lao Sichuan menu item id found for {qmenu_item_id}, need to add it to the map!")
+            logging.error(f"no corresponding Lao Sichuan menu item id found for {qmenu_item_id}, need to add it to the map!")
             (lasosichun_menu_id, lasichuan_menu_name, lasichuan_printer) = ("", "", "")
 
         return (lasosichun_menu_id, lasichuan_menu_name, lasichuan_printer)

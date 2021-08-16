@@ -3,22 +3,33 @@ from order.config import DB_FILE, URL, TOKEN
 import time
 import sys
 from order import util, accessImporter
+from order.util import getCurrentTimeInString
 import signal
+import traceback
+
+## init logging ##
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(f"{getCurrentTimeInString()}.log", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
 
 
 stopped = False
 
-def getCurrentTimeInString():
-    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
 def stop(signal, frame):
     global stopped
     stopped = True
-    print("\n got exit signal, stopping ...")
+    logging.info("\n got exit signal, stopping ...")
 
 def main():
     global stopped
-    print(f"{getCurrentTimeInString()}: start retrieving new orders ... ")
+    logging.info(f"{getCurrentTimeInString()}: start retrieving new orders ... ")
 
     retriever = OrderRetriever(URL, TOKEN)
     access = accessImporter.AccessImporter(DB_FILE, retriever.menu_items)
@@ -28,7 +39,7 @@ def main():
     signal.signal(signal.SIGTERM, stop)
 
     while not stopped:
-        print("sleep for 1 minutes")
+        logging.info("sleep for 1 minutes")
         for sec in range(0, 60):
             if stopped:
                 break
@@ -38,23 +49,31 @@ def main():
             time.sleep(1)
         print("")
 
-        localTime = getCurrentTimeInString()
-        newOrders = retriever.findNewOrders()
+        try:
+            localTime = getCurrentTimeInString()
+            newOrders = retriever.findNewOrders()
 
-        lastOrderTime = retriever.lastOrderCreationTime.strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{localTime}: found {len(newOrders)} new orders.  (last order creation time: {lastOrderTime})")
+            lastOrderTime = retriever.lastOrderCreationTime.strftime("%Y-%m-%d %H:%M:%S")
+            logging.info(f"{localTime}: found {len(newOrders)} new orders.  (last order creation time: {lastOrderTime})")
 
-        if len(newOrders) == 0:
-            continue
+            if len(newOrders) == 0:
+                continue
+        
+            for order in newOrders:
+                print("--------")
+                util.printOrder(order, retriever.getMenuItems())
+                print("")
+                access.importOrder(order)
+        except:
+            traceback_info = traceback.format_exc()
+            logging.error(traceback_info)
+            with open(f"exception-{getCurrentTimeInString()}.txt", "w") as excpetion_file:
+                excpetion_file.write(traceback_info)
+            stopped = True
+            break
 
-        for order in newOrders:
-            print("--------")
-            util.printOrder(order, retriever.getMenuItems())
-            print("")
-            access.importOrder(order)
-
-    access.close()
-    print(f"{getCurrentTimeInString()}: stopped retrieving new orders and exit!")
+    # access.close()
+    logging.info(f"{getCurrentTimeInString()}: stopped retrieving new orders and exit!")
 
 if __name__=="__main__":
     main()

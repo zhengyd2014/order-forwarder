@@ -2,7 +2,17 @@ from order.orderRetriever import OrderRetriever
 from order.config import DB_FILE, URL, TOKEN
 import time
 from order import util, accessImporter
+import logging
+import sys
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(f"{util.getCurrentTimeInString()}.log", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 def main():
     retriever = OrderRetriever(URL, TOKEN)
@@ -19,7 +29,6 @@ def main():
     else:
         "aborted!"
     
-    access.close()
     print("exit")
 
 if __name__=="__main__":
