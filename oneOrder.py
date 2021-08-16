@@ -4,13 +4,14 @@ import time
 from order import util, accessImporter
 import logging
 import sys
+from order.util import getCurrentTimeInString
 
-log_file = f"C:\\\\Users\\laosichuan\\order-forwarder\\{util.getCurrentTimeInString()}.log"
+log_file = open(f"{getCurrentTimeInString()}.log", mode="w", encoding="utf-8")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
+        logging.StreamHandler(log_file),
         logging.StreamHandler(sys.stdout)
     ]
 )

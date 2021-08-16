@@ -10,12 +10,12 @@ import traceback
 ## init logging ##
 import logging
 # log_file = f"{getCurrentTimeInString()}.log"
-log_file = f"C:\\\\Users\\laosichuan\\order-forwarder\\{getCurrentTimeInString()}.log"
+log_file = open(f"{getCurrentTimeInString()}.log", mode="w", encoding="utf-8")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
+        logging.StreamHandler(log_file),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -69,7 +69,7 @@ def main():
         except:
             traceback_info = traceback.format_exc()
             logging.error(traceback_info)
-            with open(r"exceptions.txt", "a") as excpetion_file:
+            with open(f"exceptions.txt-{getCurrentTimeInString()}", "w") as excpetion_file:
                 excpetion_file.write(traceback_info)
             stopped = True
             break
