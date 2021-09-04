@@ -12,15 +12,15 @@ import time
 
 class DbReindexer:
     def __init__(self, dbFile):
-        self.orignalDBFile = dbFile
-
+        
         (path, filename) = os.path.split(os.path.abspath(dbFile))
         (root, extenstion) = os.path.splitext(filename)
-        self.compactedDBFile = f"{path}\{root}-compacted{extenstion}"
         time_string = time.strftime("%Y%m%dT%H%M%S", time.localtime())
-        db_file_backup = f"{path}\{root}-backup-{time_string}{extenstion}"
-        copyfile(self.orignalDBFile, db_file_backup)
-        logging.info(f"created db backup file {db_file_backup}")
+
+        self.compactedDBFile = f"{path}\{root}-reindexed-{time_string}{extenstion}"
+        temp_db_file = f"{path}\{root}-temp-{time_string}{extenstion}"
+        copyfile(dbFile, temp_db_file)
+        self.orignalDBFile = temp_db_file
         
 
     def get_connection(self, dbFile):
@@ -131,12 +131,7 @@ class DbReindexer:
                     logging.info(f"reconciled a VoidLog record: OrderID: {order_transaction.OrderID}, OrderTransactionID: {old_id}(old) -> {new_id}(new)")
                     reconcile_count += 1
 
-        logging.log("")
-        logging.info("====== Summary ========")
-        logging.info(f"deleleted {len(records_with_status_5)} records from OrderTransactions for with 'TransactionStatus == 5'")
-        logging.info(f"moved {len(order_transactions)} records from original db to compacted db for OrderTransactions table")
-        logging.info(f"found {void_record_in_order_transactions_table} records with 'TransactionStatus == 2'")
-        logging.info(f"reconciled {reconcile_count} records in original OrderVoidLogs table")
+        
 
         #
         # 5. CompactedDB - OrderVoidLogs table:
@@ -152,8 +147,6 @@ class DbReindexer:
             (insertStatement, valueList) = util.buildInsertStatement("OrderVoidLogs", row_as_dict)
             compacted_db_cursor.execute(insertStatement, valueList)
 
-        logging.info(f"moved {len(void_logs)} records from original db to compacted db for OrderVoidLogs table")
-
         #
         # 6. replace the originalDB with the compactedDB
         original_db_conn.commit()
@@ -162,7 +155,16 @@ class DbReindexer:
         compacted_db_conn.close()
 
         os.remove(self.orignalDBFile)
-        os.rename(self.compactedDBFile, self.orignalDBFile)
+
+        logging.info(" ")
+        logging.info("====== Summary ========")
+        logging.info(f"deleted {len(records_with_status_5)} records from OrderTransactions for with 'TransactionStatus == 5'")
+        logging.info(f"moved {len(order_transactions)} records from original db to compacted db for OrderTransactions table")
+        logging.info(f"found {void_record_in_order_transactions_table} records with 'TransactionStatus == 2'")
+        logging.info(f"reconciled {reconcile_count} records in original OrderVoidLogs table")
+        logging.info(f"moved {len(void_logs)} records from original db to compacted db for OrderVoidLogs table")
+        logging.info(" ")
+        logging.info(f"**** the newly reindexed db file at: {self.compactedDBFile} ****")
 
 
     def findOrderTransactionID(self, rowUUID, conn):
