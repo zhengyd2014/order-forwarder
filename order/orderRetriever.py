@@ -4,9 +4,13 @@ from order import util
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
 import logging
+import sys
+import time
+
 
 class OrderRetriever:
 	def __init__(self, url, token):
+		self.request_count = 0
 		self.url = url
 		self.token = token
 		self.lastOrderCreationTime = self.getLastOrderCreationTime()
@@ -22,7 +26,24 @@ class OrderRetriever:
 		headers["Accept"] = "application/json"
 		headers["Authorization"] = self.token
 
-		resp = requests.get(url, headers=headers)
+		# retry
+		retries = 1
+		success = False
+		while not success:
+			try:
+				resp = requests.get(url, headers=headers)
+				self.request_count += 1
+				success = True
+			except Exception as e:
+				wait = retries * 10
+				if wait < 60:
+					logging.error('sucessfully sent {self.request_count} requests, then starting fail. Waiting %s secs and re-trying...' % wait)
+				else:
+					logging.error(f"retried {retries} times, still fail exit!")
+					raise e
+				sys.stdout.flush()
+				time.sleep(wait)
+				retries += 1
 
 		if resp.status_code != 200:
 			logging.error(f"can't access website, check if token is assigned, or re-generate the token, exit!")
@@ -36,6 +57,7 @@ class OrderRetriever:
 
 		# load orders
 		orders = json.loads(resp.content)
+		resp.close()
 		newestOrderNumber = util.getObjectField(orders[0], "orderNumber", defaultValue = 0)
 		oldestOrderNumber = util.getObjectField(orders[-1], "orderNumber", defaultValue = 0)
 		logging.info(f"> get {len(orders)} orders, oldest order number: {oldestOrderNumber}, newest order number: {newestOrderNumber}")

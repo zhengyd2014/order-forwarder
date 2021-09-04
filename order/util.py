@@ -7,6 +7,11 @@ def getCurrentTimeInString():
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 
 
+def getCurrentTimeAsFileName(prefix):
+    fileName = time.strftime("%Y%m%dT%H%M%S", time.localtime())
+    return f"{prefix}-{fileName}.log"
+
+
 def utcToLocal(utc_datetime):
     now_timestamp = time.time()
     offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)

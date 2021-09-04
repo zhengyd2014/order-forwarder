@@ -50,6 +50,56 @@ class AccessImporter:
         for col in cursor.description:
             print(f'\tcol: {col}')
         cursor.close()
+
+    
+    def deleteFromTable(self, tableName, to_be_deleted_Id, conn):
+        cursor = conn.cursor()
+        cursor.execute(f'delete from {tableName} where OrderID = ?', to_be_deleted_Id)
+        cursor.close()
+
+
+    def getRecordFromTable(self, tableName, Id, conn):
+        cursor = conn.cursor()
+        cursor.execute(f'select * from {tableName} where OrderID = ?', Id)
+        records = cursor.fetchall()
+        cursor.close()
+        return records
+
+    
+    def printOrder(self, id):
+        conn = pyodbc.connect(self.connectionStr)
+        orderHeaders = self.getRecordFromTable("OrderHeaders", id, conn)
+        print("=== order headers =====")
+        print(orderHeaders[0])
+
+        transactions = self.getRecordFromTable("OrderTransactions", id, conn)
+        print("=== order transactions =====")
+        for t in transactions:
+            print(t)
+
+        self.close(conn)
+
+    def deleteOrder(self, id):
+        conn = pyodbc.connect(self.connectionStr)
+        orderHeaders = self.deleteFromTable("OrderHeaders", id, conn)
+        transactions = self.deleteFromTable("OrderTransactions", id, conn)
+        print("deleted")
+
+        self.close(conn)
+
+
+    def moveId(self, id, newId):
+        conn = pyodbc.connect(self.connectionStr)
+        cursor = conn.cursor()
+        cursor.execute(f'update OrderHeaders set OrderID = ? where OrderID = ?',newId, id)
+        cursor.close()
+
+        cursor = conn.cursor()
+        cursor.execute(f'update OrderTransactions set OrderID = ? where OrderID = ?',newId, id)
+        cursor.close()
+
+        self.close(conn)
+
  
     def importOrder(self, order):
         conn = pyodbc.connect(self.connectionStr)

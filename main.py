@@ -3,14 +3,12 @@ from order.config import DB_FILE, URL, TOKEN
 import time
 import sys
 from order import util, accessImporter
-from order.util import getCurrentTimeInString
 import signal
 import traceback
 
 ## init logging ##
 import logging
-# log_file = f"{getCurrentTimeInString()}.log"
-log_file = open("laosichuan.log", mode="w", encoding="utf-8")
+log_file = open(f"{util.getCurrentTimeAsFileName('oneorder')}", mode="w", encoding="utf-8")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -31,7 +29,7 @@ def stop(signal, frame):
 
 def main():
     global stopped
-    logging.info(f"{getCurrentTimeInString()}: start retrieving new orders ... ")
+    logging.info("start retrieving new orders ... ")
 
     retriever = OrderRetriever(URL, TOKEN)
     access = accessImporter.AccessImporter(DB_FILE, retriever.menu_items)
@@ -52,11 +50,10 @@ def main():
         print("")
 
         try:
-            localTime = getCurrentTimeInString()
             newOrders = retriever.findNewOrders()
 
             lastOrderTime = retriever.lastOrderCreationTime.strftime("%Y-%m-%d %H:%M:%S")
-            logging.info(f"{localTime}: found {len(newOrders)} new orders.  (last order creation time: {lastOrderTime})")
+            logging.info(f"found {len(newOrders)} new orders.  (last order creation time: {lastOrderTime})")
 
             if len(newOrders) == 0:
                 continue
@@ -75,7 +72,7 @@ def main():
             break
 
     # access.close()
-    logging.info(f"{getCurrentTimeInString()}: stopped retrieving new orders and exit!")
+    logging.info("stopped retrieving new orders and exit!")
 
 if __name__=="__main__":
     main()

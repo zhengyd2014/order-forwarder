@@ -4,9 +4,8 @@ import time
 from order import util, accessImporter
 import logging
 import sys
-from order.util import getCurrentTimeInString
 
-log_file = open(f"laosichuan.log", mode="w", encoding="utf-8")
+log_file = open(f"{util.getCurrentTimeAsFileName('main')}", mode="w", encoding="utf-8")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
